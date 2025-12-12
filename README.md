@@ -61,6 +61,16 @@ Contains helper functions used throughout the pipeline:
 Non-technical users do not need to modify these files.
 
 
+## How to Use the Project
 
+### 1. Add new raw files
+- Place any new Excel reports into the appropriate folder inside raw/
 
+### 2. Run the data processing notebook
+- Open data_processing.ipynb and run all cells.
 
+### 3. View or analyze the results
+- Cleaned datasets will appear under staging/
+
+### 4. Explore the data
+- Use the notebook: analysis/hmo_eda.ipynb
