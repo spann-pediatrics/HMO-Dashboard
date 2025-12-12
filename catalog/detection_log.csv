@@ -1,0 +1,6 @@
+file,is_hmo,sheet,reason,verdict
+Brooklyn/251028 Ritual_REPORT.xlsx,True,ALL DATA,layout_heuristics_pass,✅ HMO
+NeoBANK/NeoBANK AC REPORT.xlsx,True,ALL DATA,layout_heuristics_pass,✅ HMO
+Oxford/250709 OxfordColostrum_Fadil_REPORT.xlsx,True,ALL DATA,layout_heuristics_pass,✅ HMO
+Brooklyn/Brooklyn College Metadata.xlsx,False,-,no_match,❌ not HMO
+Oxford/INSIGHT participant characteristics.xlsx,False,-,no_match,❌ not HMO
