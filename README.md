@@ -49,3 +49,24 @@ It handles:
 - Logging everything in the catalog/ folder
 - Creating the final merged dataset
 - A non-technical user only needs to run the notebook top-to-bottom to update the data.
+
+#### 5. catalog/ — Automated Logs
+
+These files help track what was processed:
+- detection_log.csv → records which sheet was identified as the HMO sheet
+- hmo_manifest.csv → inventory of all processed files
+- processed_log.csv → prevents re-processing previously cleaned files
+
+This folder is automatically updated by the pipeline.
+
+#### 6. project/helpers/
+
+Contains helper functions used throughout the pipeline:
+- hmo_utils.py → sheet detection, renaming rules, cleaning functions, logging, etc.
+
+Non-technical users do not need to modify these files.
+
+
+
+
+
