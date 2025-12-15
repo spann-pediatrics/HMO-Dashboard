@@ -79,5 +79,6 @@ For the streamlit visualizations
 ### 3. View or analyze the results
 - Cleaned datasets will appear under staging/
 
-### 4. Explore the data
-- Use the notebook: analysis/hmo_eda.ipynb
+### 4. Streamlit Dashboard Visualization
+- Mannually update the metadata excel folders for location and study descriptions as new studies are added
+- Dashboard shows an overview of samples analyzed so far
