@@ -60,6 +60,13 @@ Contains helper functions used throughout the pipeline:
 
 Non-technical users do not need to modify these files.
 
+#### 7. dashboard/
+For the streamlit visualizations
+
+#### 8. metadata/
+- study_locations: mannually update with the same StudyID in HMO data as new studies are added
+- study_descriptions: mannually update with a short description of what the study's focus was on as new studies are added
+
 
 ## How to Use the Project
 
