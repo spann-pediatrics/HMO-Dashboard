@@ -1,4 +1,4 @@
 file,sheet,sha256,rows,cols,staged_parquet,staged_csv,processed_at
-Brooklyn/251028 Ritual_REPORT.xlsx,ALL DATA,43e91d754fda9133fdcece119de1a2b4dd5bd02afb89affd4f1f8164f90c6606,130,69,,staging/Brooklyn/251028 Ritual_REPORT.csv,2025-11-24T21:38:03Z
-NeoBANK/NeoBANK AC REPORT.xlsx,ALL DATA,72060c7fcaa2a808facc17fefdb915054d2d1a5299f927f7be3063ef77c6e461,135,69,,staging/NeoBANK/NeoBANK AC REPORT.csv,2025-11-24T21:38:04Z
-Oxford/250709 OxfordColostrum_Fadil_REPORT.xlsx,ALL DATA,b018364e5843febf8f8490d05cd594c1fc0178b9e064f648149ae1582e768998,312,69,,staging/Oxford/250709 OxfordColostrum_Fadil_REPORT.csv,2025-11-24T21:38:04Z
+Brooklyn/251028 Ritual_REPORT.xlsx,ALL DATA,43e91d754fda9133fdcece119de1a2b4dd5bd02afb89affd4f1f8164f90c6606,130,69,,staging/Brooklyn/251028 Ritual_REPORT.csv,2025-12-12T21:31:55Z
+NeoBANK/NeoBANK AC REPORT.xlsx,ALL DATA,72060c7fcaa2a808facc17fefdb915054d2d1a5299f927f7be3063ef77c6e461,135,69,,staging/NeoBANK/NeoBANK AC REPORT.csv,2025-12-12T21:31:56Z
+Oxford/250709 OxfordColostrum_Fadil_REPORT.xlsx,ALL DATA,b018364e5843febf8f8490d05cd594c1fc0178b9e064f648149ae1582e768998,312,69,,staging/Oxford/250709 OxfordColostrum_Fadil_REPORT.csv,2025-12-12T21:31:56Z
