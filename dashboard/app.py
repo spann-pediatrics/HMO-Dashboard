@@ -5,9 +5,18 @@ from datetime import datetime
 import pydeck as pdk  
 
 
+st.set_page_config(
+    page_title="Bode Lab HMO Dashboard",
+    layout="wide",                # makes sure to fill the screen width
+    initial_sidebar_state="expanded",
+)
+
+
 # ----------------------------
 # Load Data
 # ----------------------------
+
+#merged HMO data
 @st.cache_data
 def load_data():
     df = pd.read_csv("../staging/_merged/hmo_merged.csv")
@@ -15,9 +24,9 @@ def load_data():
 
 df = load_data()
 
+# study locations metadata - manually update this excel as new studies are added
 @st.cache_data
 def load_locations():
-    # Adjust the path if needed
     loc = pd.read_excel("../metadata/study_locations.xlsx")
     return loc
 
@@ -26,6 +35,8 @@ locations = load_locations()
 # Merge study locations into your HMO dataframe
 df = df.merge(locations, on="StudyID", how="left")
 
+
+# study descriptions metadata - manually update this excel as new studies are added
 @st.cache_data
 def load_study_descriptions():
     desc = pd.read_excel("../metadata/study_descriptions.xlsx")
@@ -36,64 +47,118 @@ study_desc = load_study_descriptions()
 
 
 
-# st.write("Location df columns:", locations.columns.tolist())
-# st.write("Merged df columns:", df.columns.tolist())
 
-
+# ----------------------------
 # --- Sidebar Navigation ---
+# ----------------------------
+
+# load the UCSD logo from assets folder
+st.sidebar.image("assets/UCSD-Logo.png", use_container_width=True)
+
+
 st.sidebar.title("Bode Lab Dashboard")
 
 page = st.sidebar.radio(
     "Navigate",
-    ["Overview", "HMO Composition", "Statistics"],
+    ["Overview", "HMO Composition", "Statistics"],  #change page names as needed
 )
 
-st.sidebar.markdown("### Lab Website")
+st.sidebar.markdown("### Lab Website")       # include lab website link (if wanted)
 st.sidebar.link_button(
     "Visit Bode Lab site",
     "https://www.bodelab.com/"  # TODO: replace with real URL
 )
 
 
-
+# ----------------------------
+# --- Custom CCS Styles ---
+# ----------------------------
 
 
 st.markdown(
     """
     <style>
-    .card {
-        padding: 1rem 1.5rem;
-        border-radius: 0.75rem;
-        background-color: #ffffff;
-        box-shadow: 0 1px 3px rgba(15, 15, 15, 0.12);
-    }
-    .metric-label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #6c757d;
-        margin-bottom: 0.25rem;
-    }
-    .metric-value {
-        font-size: 1.8rem;
-        font-weight: 600;
-        color: #111827;
+    /* ---------- Layout + Background ---------- */
+    /* Main content background */
+    .main {
+        background-color: #f5f7fb;
     }
 
-    /* NEW: scrollable card for links */
-    .scroll-card {
-        max-height: 220px;      /* adjust height */
-        overflow-y: auto;
+    /* Center content a bit and give breathing room */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
     }
-    .card-link {
-        display: block;
-        margin-bottom: 0.4rem;
-        color: #2563eb;
+
+    /* Sidebar background */
+    [data-testid="stSidebar"] {
+        background-color: #eef2f7;
+    }
+
+    /* ---------- Brand Colors ---------- */
+    :root {
+        --ucsd-blue: #005b96;
+        --ucsd-gold: #ffcd00;
+        --text-muted: #6b7280;
+        --text-dark: #111827;
+        --card-bg: #ffffff;
+        --card-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        --radius-xl: 0.9rem;
+    }
+
+    /* ---------- KPI & Info Cards ---------- */
+    .card {
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius-xl);
+        background-color: var(--card-bg);
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    .metric-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+
+    .metric-value {
+        font-size: 1.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    /* ---------- Links (Key Resources, etc.) ---------- */
+    .card a.card-link, .card a {
+        color: var(--ucsd-blue);
         text-decoration: none;
         font-size: 0.9rem;
     }
-    .card-link:hover {
+
+    .card a.card-link:hover, .card a:hover {
         text-decoration: underline;
+    }
+
+    .card-link {
+    display: block;
+    margin-bottom: 0.4rem;
+    }
+
+
+    /* ---------- Titles / Section headers ---------- */
+    h1, h2, h3, h4 {
+        color: var(--text-dark);
+    }
+
+    /* tighten space under section headings slightly */
+    h3 {
+        margin-bottom: 0.4rem;
+    }
+
+    /* ---------- Search input styling ---------- */
+    input[type="text"] {
+        border-radius: 999px !important;
     }
     </style>
     """,
@@ -101,14 +166,42 @@ st.markdown(
 )
 
 
+# fonts 
+
+st.markdown("""
+<!-- Titles: Merriweather -->
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+
+<!-- Body: Source Sans Pro -->
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* Titles get the serif font */
+h1, h2, h3, h4 {
+    font-family: 'Merriweather', serif !important;
+}
+
+/* Everything else gets Source Sans Pro */
+html, body, [class*="css"] {
+    font-family: 'Source Sans Pro', sans-serif !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
-# --------- NAV + STYLES (from steps 1 & 2) go here ---------
 
 
-# --------- OVERVIEW PAGE ---------
+
+
+
+
+# ----------------------------
+# --- Overview Page ---
+# ----------------------------
+
+
 if page == "Overview":
-    st.markdown("## Bode Lab: HMO Analysis Overview")
+    st.markdown("## Overview - Bode Lab Human Milk Oligosaccaride Studies")
 
     # ---- compute metrics ----
     n_studies = df["StudyID"].nunique()
@@ -131,18 +224,23 @@ if page == "Overview":
             st.markdown(
                 f"""
                 <div class="card">
-                    <div class="metric-label">Number of Studies</div>
-                    <div class="metric-value">{n_studies}</div>
+                    <div class="metric-label">Dashboard Last Updated:</div>
+                    <div class="metric-value" style="font-size: 1.5rem;">
+                        <span style="font-style: italic; color: #6b7280;">
+                            {date_updated}
+                        </span>
+                    </div>
                 </div>
                 """,
-                unsafe_allow_html=True,
-            )
+    unsafe_allow_html=True,
+)
+
         with kpi2:
             st.markdown(
                 f"""
                 <div class="card">
-                    <div class="metric-label">Unique Samples</div>
-                    <div class="metric-value">{n_samples}</div>
+                    <div class="metric-label">Number of Studies Included:</div>
+                    <div class="metric-value">{n_studies}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -150,12 +248,14 @@ if page == "Overview":
 
         # bottom row
         kpi3, kpi4 = st.columns(2)
+
+        #change this metric !!!!!!!!!!!!!!!!!!!!!
         with kpi3:
             st.markdown(
                 f"""
                 <div class="card">
-                    <div class="metric-label">Samples with Location</div>
-                    <div class="metric-value">{samples_with_location}</div>
+                    <div class="metric-label">Unique Samples:</div>
+                    <div class="metric-value">{n_samples}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -164,8 +264,8 @@ if page == "Overview":
             st.markdown(
                 f"""
                 <div class="card">
-                    <div class="metric-label">Dashboard Last Updated</div>
-                    <div class="metric-value">{date_updated}</div>
+                    <div class="metric-label">Update with New Metrics!</div>
+                    <div class="metric-value">{n_samples}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -178,16 +278,13 @@ if page == "Overview":
             <div class="card" style="height: 100%; min-height: 220px;">
                 <div class="metric-label">Key Resources</div>
                 <a class="card-link" href="https://pubmed.ncbi.nlm.nih.gov/22513036/" target="_blank">
-                    Human Milk Oligosaccharides: every baby needs a sugar mama (2012)
+                    1. Human Milk Oligosaccharides: every baby needs a sugar mama (2012)
                 </a>
                 <a class="card-link" href="https://pubmed.ncbi.nlm.nih.gov/32160614/" target="_blank">
-                    Human Milk Oligosaccharides: Structure and Functions (2020)
+                    2. Human Milk Oligosaccharides: Structure and Functions (2020)
                 </a>
-                <a class="card-link" href="https://doi.org/10.xxxx/your-paper-2" target="_blank">
-                    Secretor Status & Milk Glycans (2022)
-                </a>
-                <a class="card-link" href="https://doi.org/10.xxxx/your-paper-3" target="_blank">
-                    HMO–Microbiome Interactions (Review)
+                <a class="card-link" href="https://pubmed.ncbi.nlm.nih.gov/33328245/" target="_blank">
+                    3. Human Milk Oligosaccharide DSLNT and gut microbiome in preterm infants predicts necrotising entercolitis (2021)
                 </a>
             </div>
             """,
@@ -254,6 +351,50 @@ if page == "Overview":
 
 
 
+
+  # ---- new section: Visual for Number of Samples per Study ----
+
+    # --- Samples per Study bar chart ---
+    st.markdown("### Number of Samples per Study")
+
+    study_counts = (
+        df.groupby("StudyID")["SampleName"]
+        .nunique()
+        .reset_index(name="n_samples")
+    )
+
+    ucsd_blue = "#00356B"  # official UCSD navy shade
+
+    bar = (
+        alt.Chart(study_counts)
+        .mark_bar(color=ucsd_blue)
+        .encode(
+            x=alt.X(
+                "StudyID:N",
+                title="Study",
+                sort="-y",
+                axis=alt.Axis(labelAngle=-35)  # tilt labels
+            ),
+            y=alt.Y(
+                "n_samples:Q",
+                title="Number of Unique Samples"
+            ),
+            tooltip=["StudyID", "n_samples"]
+        )
+        .properties(height=450)
+    )
+
+    st.altair_chart(bar, use_container_width=True)
+
+
+
+
+
+
+
+
+
+    # ---- new section: Study Descriptions ----
     st.markdown("### About the Studies Included")
 
     # Search box
@@ -285,6 +426,11 @@ if page == "Overview":
                 """,
                 unsafe_allow_html=True,
             )
+
+
+
+
+
 
 
 #####################################################
