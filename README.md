@@ -5,11 +5,10 @@ It takes raw Excel reports (which vary in structure and naming), detects the cor
 The goal is to make HMO data comparable across studies so it can be analyzed in tools like Streamlit, Tableau, Power BI, or Python.
 
 ## Project Workflow (Simple Explanation)
-1. Raw HMO Excel files are placed in the raw/ folder, grouped by study (e.g., Oxford, Brooklyn, NeoBANK).
+1. Raw HMO Excel files are placed in the raw/ folder, grouped by study (e.g., Oxford, Brooklyn, NeoBANK). Mannually upload more studies as more are analyzed, make sure to upload seperate excel sheets for the HMO area counts and associated metadata.
 2. The data processing pipeline (data_processing.ipynb) scans those files, identifies the correct HMO sheet and standardizes column names.
-3. Cleaned versions of each file are saved into the staging/ folder under the matching study name.
-4. All cleaned files are combined into one master file inside staging/_merged/. Called 'hmo_merged.csv'
-5. The merged file is used for visualization and inital exploratory analysis can be found the notebook analysis/hmo_eda.ipynb.
+3. Cleaned versions of each HMO file are saved into the staging/ folder under the matching study name.
+4. All cleaned HMO files are combined into one master file inside staging/_merged/. Called 'hmo_merged.csv'
 
 
 ## Folder Descriptions
@@ -18,7 +17,7 @@ The goal is to make HMO data comparable across studies so it can be analyzed in 
 
 - This folder contains the original Excel reports exactly as provided by each study.
 - They are not edited.
-- Each study (e.g., Brooklyn, NeoBANK, Oxford) has its own subfolder with the respective cmetadata data and HMO area counts.
+- When uploading studies label the folder the study name (e.g., Brooklyn, NeoBANK, Oxford) with the respective metadata and HMO area count excel sheets within.
 
 #### 2. staging/ — Cleaned Outputs
 
@@ -26,32 +25,26 @@ The goal is to make HMO data comparable across studies so it can be analyzed in 
 - Each study has its own folder containing cleaned CSV files.
 - The staging/_merged/ folder contains: hmo_merged.csv → the final standardized dataset combining all studies.
 
-#### 3. analysis/
-
-- Contains visualization and exploratory analysis.
-- hmo_eda.ipynb → plots, summary statistics, and data exploration.
-
-
-#### 4. data_processing.ipynb — Main Pipeline Notebook
+#### 3. data_processing.ipynb — Main Pipeline Notebook
 
 This is the core of the project.
 
 It handles:
-- Detecting the correct HMO sheet within each Excel file
-- Standardizing column names to renaming HMO columns to a consistent format
+- Detecting HMO area count sheets within each /raw subfolder
+- Standardizing column names and renaming HMO columns to a consistent format
 - Saving cleaned versions into staging/
-- Logging everything in the catalog/ folder
+- Logging everything in the catalog/ folderc
 - Creating the final merged dataset
-- A non-technical user only needs to run the notebook top-to-bottom to update the data.
+- To update the hmo_merged.csv file with new projects uploaded, run this file (play button, run all) to update.
+- Will see a 'HMO Sheet Detection Summary' mid-way through the sheet, with green checkmarks for files that are read and red x for ones not and at the very end should say 'Merged X files(s) -> staging/_merged/hmo_merged.csv (XXXX rows, 70 cols)
 
 #### 5. catalog/ — Automated Logs
 
 These files help track what was processed:
 - detection_log.csv → records which sheet was identified as the HMO sheet
-- hmo_manifest.csv → inventory of all processed files
 - processed_log.csv → prevents re-processing previously cleaned files
 
-This folder is automatically updated by the pipeline.
+This folder is automatically updated by the pipeline. Check this as a sanity measure for what files are being read.
 
 #### 6. project/helpers/
 
