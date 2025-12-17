@@ -2,7 +2,7 @@
 This project provides a clean and reproducible workflow for processing Human Milk Oligosaccharide (HMO) data from multiple studies.
 It takes raw Excel reports (which vary in structure and naming), detects the correct HMO sheet, cleans datasheets, and produces consistent, analysis-ready files.
 
-The goal is to make HMO data comparable across studies so it can be analyzed in tools like Tableau, Power BI, or Python.
+The goal is to make HMO data comparable across studies so it can be analyzed in tools like Streamlit, Tableau, Power BI, or Python.
 
 ## Project Workflow (Simple Explanation)
 1. Raw HMO Excel files are placed in the raw/ folder, grouped by study (e.g., Oxford, Brooklyn, NeoBANK).
