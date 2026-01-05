@@ -4,7 +4,7 @@ It takes raw Excel reports (which vary in structure and naming), detects the cor
 
 The goal is to make HMO data comparable across studies so it can be analyzed in tools like Streamlit, Tableau, Power BI, or Python.
 
-## Project Workflow (Simple Explanation)
+## Project Workflow 
 1. Raw HMO Excel files are placed in the raw/ folder, grouped by study (e.g., Oxford, Brooklyn, NeoBANK). Mannually upload more studies as more are analyzed, make sure to upload seperate excel sheets for the HMO area counts and associated metadata.
 2. The data processing pipeline (data_processing.ipynb) scans those files, identifies the correct HMO sheet and standardizes column names.
 3. Cleaned versions of each HMO file are saved into the staging/ folder under the matching study name.
