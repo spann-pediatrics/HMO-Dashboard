@@ -75,3 +75,4 @@ For the streamlit visualizations
 ### 4. Streamlit Dashboard Visualization
 - Mannually update the metadata excel folders for location and study descriptions as new studies are added
 - Dashboard shows an overview of samples analyzed so far
+- In the terminal run 'cd dashboard' then 'streamlit run app.py' for a visualization on the updated Streamlit website
