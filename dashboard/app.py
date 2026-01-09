@@ -3,6 +3,8 @@ import pandas as pd
 import altair as alt
 from datetime import datetime
 import pydeck as pdk  
+import plotly as plt
+import plotly.express as px
 
 
 st.set_page_config(
@@ -39,11 +41,12 @@ df = df.merge(locations, on="StudyID", how="left")
 # study descriptions metadata - manually update this excel as new studies are added
 @st.cache_data
 def load_study_descriptions():
-    desc = pd.read_excel("../metadata/study_descriptions.xlsx")
-    desc.columns = desc.columns.str.strip()  # clean whitespace
-    return desc
+    df_desc = pd.read_excel("../metadata/study_descriptions.xlsx")
+    df_desc.columns = df_desc.columns.str.strip().str.replace(" ", "_")  # normalize names
+    return df_desc
 
 study_desc = load_study_descriptions()
+
 
 
 
@@ -366,23 +369,15 @@ if page == "Overview":
     ucsd_blue = "#00356B"  # official UCSD navy shade
 
     bar = (
-        alt.Chart(study_counts)
-        .mark_bar(color=ucsd_blue)
-        .encode(
-            x=alt.X(
-                "StudyID:N",
-                title="Study",
-                sort="-y",
-                axis=alt.Axis(labelAngle=-35)  # tilt labels
-            ),
-            y=alt.Y(
-                "n_samples:Q",
-                title="Number of Unique Samples"
-            ),
-            tooltip=["StudyID", "n_samples"]
-        )
-        .properties(height=450)
+    alt.Chart(study_counts)
+    .mark_bar(color=ucsd_blue)
+    .encode(
+        y=alt.Y("StudyID:N", title="Study", sort="-x"),
+        x=alt.X("n_samples:Q", title="Number of Unique Samples"),
+        tooltip=["StudyID", "n_samples"]
     )
+    .properties(height=300)
+)
 
     st.altair_chart(bar, use_container_width=True)
 
@@ -394,38 +389,80 @@ if page == "Overview":
 
 
 
-    # ---- new section: Study Descriptions ----
+
+    
+    # About the Studies Included
+    # -------------------------
     st.markdown("### About the Studies Included")
 
-    # Search box
-    query = st.text_input("Search studies", value="", placeholder="Search by StudyID…")
+    # 1) Compute number of samples per study from main df
+    sample_counts = (
+        df.groupby("StudyID")["SampleName"]
+        .nunique()
+        .reset_index(name="num_samples")  # <-- we will use THIS name
+    )
 
-    # Filter by StudyID or Description
+    # 2) Merge descriptions + sample counts
+    # study_desc comes from load_study_descriptions()
+    study_info = study_desc.merge(sample_counts, on="StudyID", how="left")
+
+    # 3) Normalize column names from Excel so they are easier to work with in code
+    study_info = study_info.rename(columns={
+        "collection window": "collection_window",
+        "sample type": "sample_type",
+    })
+
+    # 4) Search bar
+    query = st.text_input(
+        "Search studies",
+        value="",
+        placeholder="Search by StudyID, description, keywords, population, sample type..."
+    )
+
+    # 5) Decide which columns we *want* to show
+    desired_cols = [
+        "StudyID",
+        "Description",
+        "num_samples",         # <-- uses the computed column name above
+        "Keywords",
+        "collection_window",
+        "population",
+        "sample_type",
+    ]
+
+    # Only keep the ones that actually exist to avoid KeyErrors
+    cols_to_show = [c for c in desired_cols if c in study_info.columns]
+
+    # 6) Filter based on query across several text fields
     if query:
-        filtered_desc = study_desc[
-            study_desc["StudyID"].str.contains(query, case=False, na=False) |
-            study_desc["Description"].str.contains(query, case=False, na=False)
-        ]
+        mask = (
+            study_info["StudyID"].astype(str).str.contains(query, case=False, na=False)
+            | study_info["Description"].astype(str).str.contains(query, case=False, na=False)
+            | study_info["Keywords"].astype(str).str.contains(query, case=False, na=False)
+            | study_info.get("population", "").astype(str).str.contains(query, case=False, na=False)
+            | study_info.get("sample_type", "").astype(str).str.contains(query, case=False, na=False)
+            | study_info.get("collection_window", "").astype(str).str.contains(query, case=False, na=False)
+        )
+        filtered = study_info[mask]
     else:
-        filtered_desc = study_desc.copy()
+        filtered = study_info.copy()
 
-    # Handle no matches
-    if filtered_desc.empty:
-        st.info("No studies match your search.")
-    else:
-        # Sort alphabetically for consistency
-        filtered_desc = filtered_desc.sort_values("StudyID")
+    # 7) Final table for display
+    display_df = filtered[cols_to_show].rename(columns={
+        "StudyID": "Study ID",
+        "num_samples": "# Samples",
+        "collection_window": "Collection Window",
+        "sample_type": "Sample Type",
+        "population": "Population",
+    })
 
-        for _, row in filtered_desc.iterrows():
-            st.markdown(
-                f"""
-                <div class="card" style="margin-bottom: 0.75rem; font-size: 0.95rem;">
-                    <div class="metric-label">{row['StudyID']}</div>
-                    <div>{row['Description']}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+    st.dataframe(
+        display_df,
+        use_container_width=True,
+        hide_index=True,
+    )
+
+
 
 
 
@@ -440,7 +477,93 @@ if page == "Overview":
 
 elif page == "HMO Composition":
     st.markdown("## HMO Composition")
-    st.info("We’ll put stacked bars, secretor vs non-secretor plots, etc. here.")
+    
+
+    # --- Aggregate secretor vs non-secretor per study ---
+    comp_df = (
+        df
+        .dropna(subset=["Secretor", "StudyID"])
+        .groupby("StudyID")
+        .agg(
+            n_total=("Secretor", "count"),
+            n_secretor=("Secretor", "sum")  # since 1 = secretor, 0 = non
+        )
+        .reset_index()
+    )
+
+    comp_df["pct_secretor"] = comp_df["n_secretor"] / comp_df["n_total"]
+    comp_df["pct_non_secretor"] = 1 - comp_df["pct_secretor"]
+
+
+
+    # reshape for staked bar plotting 
+    plot_df = comp_df.melt(
+        id_vars="StudyID",
+        value_vars=["pct_secretor", "pct_non_secretor"],
+        var_name="SecretorStatus",
+        value_name="Proportion"
+    )
+
+    plot_df["SecretorStatus"] = plot_df["SecretorStatus"].map({
+        "pct_secretor": "Secretor",
+        "pct_non_secretor": "Non-secretor"
+    })
+
+    # --- Layout: Left plot, right text ---
+
+    col1, col2 = st.columns([1.5, 2])
+
+
+    with col1:
+        st.markdown("### About Secretor Status")
+
+        st.image(
+        "assets/secretor_hmo_diagram.png",
+        # caption="FUT2 activity influences α1–2–fucosylated HMO production",
+        width=350
+    )
+        
+        st.markdown(
+            """
+            Secretor status reflects whether the **FUT2 gene** is active,
+            enabling the synthesis of α1–2–fucosylated HMOs (e.g., 2′FL).
+            
+            This biological difference shapes milk composition and infant
+            gut microbial development.
+            """
+        )
+        
+
+    
+    with col2:
+        fig = px.bar(
+        plot_df,
+        x="Proportion",
+        y="StudyID",
+        color="SecretorStatus",
+        orientation="h",
+        text=plot_df["Proportion"].round(2),
+        title="Secretor vs Non-secretor Composition by Study",
+        color_discrete_map={
+            "Secretor": "#8EC9E6",        # light blue
+            "Non-secretor": "#C9C9C9"     # light gray
+        }
+)
+
+        fig.update_layout(
+            barmode="stack",
+            xaxis=dict(tickformat=".0%"),
+            legend_title=""
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+
+
+
+
+
+
 
 elif page == "Statistics":
     st.markdown("## Statistical Analyses")
