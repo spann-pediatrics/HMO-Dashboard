@@ -1,0 +1,3 @@
+study_id,staged_csv,sample_id_candidates,subject_id_candidates,study_week,maternal_age,gestational_age_weeks,lactation_week_postpartum
+Brooklyn,staging/Brooklyn/metadata__Brooklyn College Metadata__sheet1.csv,sample_name,subject_id,study_week,maternal_age,gestational_age_week,lactation_stage_week_postpartum
+Oxford,staging/Oxford/metadata__metadata_overview_oxford__sheet1.csv,NA,participant_id,NA,mat_age,"sga,gest_age_birth,gest_age_baseline,gestational_diabetes",NA

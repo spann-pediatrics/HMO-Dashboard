@@ -1,0 +1,4 @@
+study_id,raw_rel_path,sheet_used,n_sheets,sheet_names,rows,cols,staged_csv_rel_path,status,error
+Brooklyn,Brooklyn/Brooklyn College Metadata.xlsx,Sheet1,1.0,Sheet1,129.0,6.0,staging/Brooklyn/metadata__Brooklyn College Metadata__sheet1.csv,success,
+Oxford,Oxford/metadata_overview_oxford.xlsx,Sheet1,1.0,Sheet1,145.0,65.0,staging/Oxford/metadata__metadata_overview_oxford__sheet1.csv,success,
+Oxford,Oxford/~$metadata_overview_oxford.xlsx,,,,,,,failed,"Excel file format cannot be determined, you must specify an engine manually."

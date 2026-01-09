@@ -1,0 +1,13 @@
+study_id,staged_csv,canonical_field,selected_column,alternates,reason
+Brooklyn,staging/Brooklyn/metadata__Brooklyn College Metadata__sheet1.csv,study_week,study_week,,single_hit
+Brooklyn,staging/Brooklyn/metadata__Brooklyn College Metadata__sheet1.csv,maternal_age,maternal_age,,single_hit
+Brooklyn,staging/Brooklyn/metadata__Brooklyn College Metadata__sheet1.csv,gestational_age_weeks,gestational_age_week,,single_hit
+Brooklyn,staging/Brooklyn/metadata__Brooklyn College Metadata__sheet1.csv,lactation_week_postpartum,lactation_stage_week_postpartum,,single_hit
+Brooklyn,staging/Brooklyn/metadata__Brooklyn College Metadata__sheet1.csv,subject_id,subject_id,,id_candidate_first
+Brooklyn,staging/Brooklyn/metadata__Brooklyn College Metadata__sheet1.csv,hmo_sample_name,sample_name,,id_candidate_first
+Oxford,staging/Oxford/metadata__metadata_overview_oxford__sheet1.csv,study_week,,,not_found
+Oxford,staging/Oxford/metadata__metadata_overview_oxford__sheet1.csv,maternal_age,mat_age,,single_hit
+Oxford,staging/Oxford/metadata__metadata_overview_oxford__sheet1.csv,gestational_age_weeks,gest_age_birth,"sga,gestational_diabetes,gest_age_baseline",token_scoring
+Oxford,staging/Oxford/metadata__metadata_overview_oxford__sheet1.csv,lactation_week_postpartum,,,not_found
+Oxford,staging/Oxford/metadata__metadata_overview_oxford__sheet1.csv,subject_id,participant_id,,id_candidate_first
+Oxford,staging/Oxford/metadata__metadata_overview_oxford__sheet1.csv,hmo_sample_name,,,id_candidate_first

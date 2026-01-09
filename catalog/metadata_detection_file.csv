@@ -1,0 +1,10 @@
+study_id,rel_path,filename,meta_hits,hmo_hits,filename_metadata_likely
+Brooklyn,Brooklyn/251028 Ritual_REPORT.xlsx,251028 Ritual_REPORT.xlsx,,,False
+Brooklyn,Brooklyn/Brooklyn College Metadata.xlsx,Brooklyn College Metadata.xlsx,"meta,metadata",,True
+DHM Pooled,DHM Pooled/251028 DHM_Pooling_Monica_REPORT.xlsx,251028 DHM_Pooling_Monica_REPORT.xlsx,,,False
+DHM Pooled,DHM Pooled/Copy of Copy of Pool Optimization Study- UCH+AUS.xlsx,Copy of Copy of Pool Optimization Study- UCH+AUS.xlsx,,,False
+NeoBANK,NeoBANK/NeoBANK AC REPORT.xlsx,NeoBANK AC REPORT.xlsx,,,False
+Oxford,Oxford/250709 OxfordColostrum_Fadil_REPORT.xlsx,250709 OxfordColostrum_Fadil_REPORT.xlsx,,,False
+Oxford,Oxford/metadata_overview_oxford.xlsx,metadata_overview_oxford.xlsx,"meta,metadata",,True
+Oxford,Oxford/~$250709 OxfordColostrum_Fadil_REPORT.xlsx,~$250709 OxfordColostrum_Fadil_REPORT.xlsx,,,False
+Oxford,Oxford/~$metadata_overview_oxford.xlsx,~$metadata_overview_oxford.xlsx,"meta,metadata",,True
