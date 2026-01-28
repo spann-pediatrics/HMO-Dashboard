@@ -29,7 +29,7 @@ df = load_data()
 # study locations metadata - manually update this excel as new studies are added
 @st.cache_data
 def load_locations():
-    loc = pd.read_excel("../metadata/study_locations.xlsx")
+    loc = pd.read_excel("../study extras/study_locations.xlsx")
     return loc
 
 locations = load_locations()
@@ -41,7 +41,7 @@ df = df.merge(locations, on="StudyID", how="left")
 # study descriptions metadata - manually update this excel as new studies are added
 @st.cache_data
 def load_study_descriptions():
-    df_desc = pd.read_excel("../metadata/study_descriptions.xlsx")
+    df_desc = pd.read_excel("../study extras/study_descriptions.xlsx")
     df_desc.columns = df_desc.columns.str.strip().str.replace(" ", "_")  # normalize names
     return df_desc
 
@@ -509,29 +509,72 @@ elif page == "HMO Composition":
         "pct_non_secretor": "Non-secretor"
     })
 
+
+
+
+    # ----------------------------
+    # 1) Identify the 19 HMO columns (use ug/mL columns from your merged file)
+    # ----------------------------
+
+    # We want the 19 individual HMOs in ug/mL (NOT the summary columns like SUM)
+    HMO_UNIT = "(ug/mL)"
+    EXCLUDE_HMO_COLS = {f"SUM {HMO_UNIT}"}  # exclude summary column
+
+    # Auto-detect all ug/mL HMO columns, then remove excluded ones
+    HMO_COLS = [
+        c for c in df.columns
+        if HMO_UNIT in c and c not in EXCLUDE_HMO_COLS
+    ]
+
+
+
+    
     # --- Layout: Left plot, right text ---
 
     col1, col2 = st.columns([1.5, 2])
 
 
     with col1:
-        st.markdown("### About Secretor Status")
+        st.markdown("### Dataset Snapshot")
 
-        st.image(
-        "assets/secretor_hmo_diagram.png",
-        # caption="FUT2 activity influences α1–2–fucosylated HMO production",
-        width=350
-    )
-        
+        # --- KPI values ---
+        n_samples = df["SampleName"].nunique()
+        n_studies = df["StudyID"].nunique()
+        n_hmos = len(HMO_COLS)
+
+        # --- KPI Card 1: Samples ---
         st.markdown(
-            """
-            Secretor status reflects whether the **FUT2 gene** is active,
-            enabling the synthesis of α1–2–fucosylated HMOs (e.g., 2′FL).
-            
-            This biological difference shapes milk composition and infant
-            gut microbial development.
-            """
+            f"""
+            <div style="padding: 16px; border-radius: 10px; background-color: #F5F7FA; margin-bottom: 12px;">
+                <div style="font-size: 14px; color: #6B7280;">Samples Analyzed</div>
+                <div style="font-size: 32px; font-weight: 600;">{n_samples:,}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
+
+        # --- KPI Card 2: Studies ---
+        st.markdown(
+            f"""
+            <div style="padding: 16px; border-radius: 10px; background-color: #F5F7FA; margin-bottom: 12px;">
+                <div style="font-size: 14px; color: #6B7280;">Studies Represented</div>
+                <div style="font-size: 32px; font-weight: 600;">{n_studies}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # --- KPI Card 3: HMOs ---
+        st.markdown(
+            f"""
+            <div style="padding: 16px; border-radius: 10px; background-color: #F5F7FA;">
+                <div style="font-size: 14px; color: #6B7280;">HMOs Quantified</div>
+                <div style="font-size: 32px; font-weight: 600;">{n_hmos}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
         
 
     
@@ -564,10 +607,193 @@ elif page == "HMO Composition":
 
 
 
+    # Sanity check
+    if len(HMO_COLS) == 0:
+        st.warning(
+            f"No HMO columns found for unit {HMO_UNIT}. "
+            "Check your column names (e.g., '2FL (ug/mL)') and update HMO_UNIT / EXCLUDE_HMO_COLS."
+        )
+        st.stop()
 
-elif page == "Statistics":
-    st.markdown("## Statistical Analyses")
-    st.info("We’ll add PCA, correlations, and models here later.")
+    # ----------------------------
+    # 2) Choose ID / metadata columns to carry through the melt
+    # ----------------------------
+    ID_COLS = [c for c in ["StudyID", "SampleName", "Secretor"]
+            if c in df.columns]
+
+    # Optional: ensure the two required IDs exist
+    required = {"StudyID", "SampleName"}
+    missing = required - set(ID_COLS)
+    if missing:
+        st.error(f"Missing required columns for plotting: {missing}")
+        st.stop()
+
+    # ----------------------------
+    # 3) Reshape wide → long (melt)
+    # ----------------------------
+    plot_df = df[ID_COLS + HMO_COLS].copy()
+
+    long_df = plot_df.melt(
+        id_vars=ID_COLS,      # columns to keep (repeated down rows)
+        value_vars=HMO_COLS,  # HMO measurement columns to stack
+        var_name="HMO",       # new column that stores the HMO name
+        value_name="concentration"  # new column that stores the numeric value
+)
+    
+    # ----------------------------
+    # 4) Clean concentration + labels
+    # ----------------------------
+    long_df["concentration"] = pd.to_numeric(long_df["concentration"], errors="coerce")
+    long_df = long_df.dropna(subset=["concentration"])
+
+    # Optional: remove units from HMO label for nicer y-axis
+    long_df["HMO"] = long_df["HMO"].str.replace(f" {HMO_UNIT}", "", regex=False)
+
+    
+    # ----------------------------
+    # Add plot-friendly secretor labels
+    # ----------------------------
+    def secretor_label(x):
+        if pd.isna(x):
+            return "Unknown"
+        s = str(x).strip().lower()
+        if s in {"1", "1.0"}:
+            return "Secretor"
+        if s in {"0", "0.0"}:
+            return "Non-secretor"
+        return "Unknown"
+
+    long_df["SecretorLabel"] = long_df["Secretor"].apply(secretor_label)
+
+    # Sanity check (temporary, remove later)
+    st.caption(long_df["SecretorLabel"].value_counts().to_dict())
+
+
+
+    # ----------------------------
+    # 6) Sidebar filters (start simple: Study)
+    # ----------------------------
+    st.sidebar.markdown("## Filters")
+
+    study_options = sorted(long_df["StudyID"].dropna().unique().tolist())
+    selected_studies = st.sidebar.multiselect(
+        "Study",
+        options=study_options,
+        default=study_options
+    )
+
+    plot_long = long_df[long_df["StudyID"].isin(selected_studies)].copy()
+
+
+    sel_long = long_df[long_df["StudyID"].isin(selected_studies)].copy()
+    plot_long = sel_long.copy()
+
+
+
+
+
+
+
+
+    st.markdown("### HMO Summary Statistics")
+
+    range_group = st.selectbox(
+        "Compute summary statistics for:",
+        ["All", "Secretor", "Non-secretor"],
+        index=0
+    )
+
+    if range_group == "All":
+        table_df = sel_long
+    else:
+        table_df = sel_long[sel_long["SecretorLabel"] == range_group].copy()
+
+    summary = (
+        table_df
+        .groupby("HMO")["concentration"]
+        .agg(
+            n="count",
+            p05=lambda x: x.quantile(0.05),
+            median="median",
+            p95=lambda x: x.quantile(0.95),
+            mean="mean",
+            std="std"
+        )
+        .reset_index()
+    )
+
+    display_summary = summary.copy()
+    for c in ["p05", "median", "p95", "mean", "std"]:
+        display_summary[c] = display_summary[c].round(2)
+
+    st.dataframe(
+        display_summary.sort_values("HMO"),
+        use_container_width=True
+    )
+
+
+
+
+
+
+
+
+########## -------- PLOT --------- ##########
+
+    st.markdown('---')
+    st.markdown("### HMO Concentration Distributions")
+
+
+
+    # Quick sanity
+    st.caption(f"Points available to plot: {len(long_df):,}")
+
+
+
+    st.caption(f"Showing {plot_long.shape[0]:,} points after Study filter")
+
+
+    secretor_options = ["Secretor", "Non-secretor", "Unknown"]
+    selected_secretors = st.sidebar.multiselect(
+        "Secretor status",
+        options=secretor_options,
+        default=secretor_options
+    )
+
+    plot_long = plot_long[plot_long["SecretorLabel"].isin(selected_secretors)].copy()
+    st.caption(f"Showing {plot_long.shape[0]:,} points after Secretor filter")
+
+
+
+    use_log = st.checkbox("Log scale (x-axis)", value=True)
+
+    fig = px.strip(
+    plot_long,
+    x="concentration",
+    y="HMO",
+    color="SecretorLabel",
+    stripmode="overlay",
+    color_discrete_map={
+        "Secretor": "#8EC9E6",
+        "Non-secretor": "#F2A3A3",
+        "Unknown": "#C9C9C9"
+    },
+)
+
+
+    fig.update_traces(marker=dict(opacity=0.6, size=4))
+
+    if use_log:
+        fig.update_xaxes(type="log")
+
+    fig.update_layout(
+        height=700,
+        legend_title="Secretor status",
+        xaxis_title="Concentration (ug/mL)",
+        yaxis_title="HMO",
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 
 
